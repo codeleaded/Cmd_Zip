@@ -8,11 +8,11 @@ int main(){
     FilesSize size;
     char* data = Files_ReadB(Path,&size);
     
-    printf("Beginning: S: %lld\n",size);
-    void* compressed = Zip_Byte_zip(data,&size);
-    printf("Compressed: S: %lld\n",size);
-    void* opened = Zip_Byte_open(compressed,&size);
-    printf("Opened: S: %lld\n",size);
+    printf("Beginning: S: %d\n",size);
+    void* compressed = Zip_Byte_zip(data,(long long[]){ size });
+    printf("Compressed: S: %d\n",size);
+    void* opened = Zip_Byte_open(compressed,(long long[]){ size });
+    printf("Opened: S: %d\n",size);
 
     Files_Write(Path,opened,size);
 
