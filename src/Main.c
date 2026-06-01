@@ -3,21 +3,33 @@
 #include "/home/codeleaded/System/Static/Library/Zip.h"
 
 int main(){
-    char Path[] = "./File.txt";
+    //char Path[] = "./data/File.txt";
+    char Path[] = "./data/Car_Green_Fast.png";
+    char Out[] = "./data/Car_Green_Fast_OUT.png";
     
-    FilesSize size;
-    char* data = Files_ReadB(Path,&size);
+    FilesSize fsize;
+    char* data = Files_ReadB(Path,&fsize);
+    if(data){
+        printf("Opened: '%s'\n",Path);
+        printf("Beginning: S: %u\n",fsize);
     
-    printf("Beginning: S: %u\n",size);
-    void* compressed = Zip_Byte_zip(data,(long long[]){ size });
-    printf("Compressed: S: %u\n",size);
-    void* opened = Zip_Byte_open(compressed,(long long[]){ size });
-    printf("Opened: S: %u\n",size);
+        Zip_Size csize = fsize;
+        void* compressed = Zip_Compress(data,&csize,4);
+        printf("Compressed: S: %llu\n",csize);
+        
+        Zip_Size dsize = csize;
+        Zip_Size rdsize = Zip_Decompress_Size(compressed,&dsize);
+        void* opened = Zip_Decompress(compressed,&dsize);
+        printf("Opened: S: %llu (%llu)\n",dsize,rdsize);
 
-    Files_Write(Path,opened,size);
+        printf("Output: '%s' -> %lf %%\n",Path,(double)csize / (double)fsize * 100.0);
+        Files_Write(Out,opened,rdsize);
 
-    free(compressed);
-    free(data);
+        free(compressed);
+        free(data);
+    }else{
+        printf("Can't open: '%s'\n",Path);
+    }
 
     return 0;
 }
