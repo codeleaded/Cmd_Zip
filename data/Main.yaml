@@ -1,0 +1,184 @@
+system:
+  name: "MegaApp"
+  version: "4.2.1"
+  environment: production
+  features:
+    authentication: true
+    authorization: true
+    caching:
+      enabled: true
+      backend: redis
+      hosts:
+        - redis01.internal:6379
+        - redis02.internal:6379
+
+database:
+  default: &db_defaults
+    retry_attempts: 3
+    timeout: 5000
+    ssl: true
+
+  connections:
+    main:
+      <<: *db_defaults
+      host: db-main.internal
+      port: 5432
+      user: appuser
+      replicas:
+        - host: db-replica-1.internal
+          lag: 200ms
+        - host: db-replica-2.internal
+          lag: 150ms
+    analytics:
+      <<: *db_defaults
+      host: analytics-db.internal
+      port: 3306
+      engines:
+        daily:
+          table: daily_stats
+          partitioning: date
+        hourly:
+          table: hourly_stats
+          partitioning: time
+
+users:
+  roles:
+    - id: 1
+      name: admin
+      permissions:
+        - system:*
+        - users:*
+        - settings:write
+    - id: 2
+      name: editor
+      permissions:
+        - content:write
+        - content:read
+        - media:upload
+    - id: 3
+      name: viewer
+      permissions:
+        - content:read
+
+  accounts:
+    active:
+      - username: "alice"
+        role: admin
+        settings:
+          theme: dark
+          notifications:
+            email: true
+            sms: false
+      - username: "bob"
+        role: editor
+        settings:
+          theme: light
+          notifications:
+            email: true
+            sms: true
+    inactive:
+      - username: "carla"
+        role: viewer
+        reason: "left_company"
+      - username: "dennis"
+        role: editor
+        reason: "security_hold"
+
+logging:
+  levels:
+    default: INFO
+    modules:
+      auth: DEBUG
+      payments: WARN
+      analytics: ERROR
+  outputs:
+    console: true
+    file:
+      enabled: true
+      path: /var/log/megaapp/app.log
+    remote:
+      enabled: false
+
+events:
+  - type: user_login
+    user: alice
+    timestamp: 2025-05-12T14:33:11Z
+    metadata:
+      ip: "192.168.1.12"
+      method: web
+  - type: file_upload
+    user: bob
+    timestamp: 2025-05-12T14:45:00Z
+    file:
+      name: "report.pdf"
+      size_kb: 488
+      tags:
+        - finance
+        - q2
+
+cache:
+  layers:
+    fast:
+      type: memory
+      max_entries: 5000
+    mid:
+      type: redis
+      cluster: true
+      nodes:
+        - 10.0.0.10
+        - 10.0.0.11
+    slow:
+      type: filesystem
+      path: /var/cache/megaapp
+      cleanup:
+        enabled: true
+        interval: 24h
+
+api:
+  endpoints:
+    - path: /v1/users
+      method: GET
+      auth_required: true
+      rate_limit:
+        window: 1m
+        max: 1000
+    - path: /v1/upload
+      method: POST
+      auth_required: true
+      rate_limit: &uploadLimits
+        window: 1m
+        max: 50
+    - path: /v1/admin/upload
+      method: POST
+      auth_required: true
+      rate_limit:
+        <<: *uploadLimits
+        max: 10   # override for admin route
+
+monitoring:
+  uptime:
+    check_interval: 30s
+    history:
+      - status: ok
+        timestamp: 2025-05-12T14:00:00Z
+      - status: warning
+        timestamp: 2025-05-12T13:00:00Z
+        details:
+          service: analytics
+          issue: latency
+
+storage:
+  buckets:
+    images:
+      type: s3
+      region: eu-central-1
+      lifecycle:
+        - action: transition
+          days: 30
+          storage_class: STANDARD_IA
+        - action: expire
+          days: 365
+    logs:
+      type: local
+      path: /var/storage/logs
+      compress: true

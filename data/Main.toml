@@ -1,0 +1,137 @@
+# =====================================================================
+#                            APP KONFIGURATION
+# =====================================================================
+
+title = "Meine Testanwendung"
+version = "1.4.2"
+debug = true
+
+release_date = 2024-01-15
+release_time = 14:30:00
+
+# =====================================================================
+#                              SERVER
+# =====================================================================
+
+[server]
+host = "127.0.0.1"
+port = 8080
+workers = 4
+
+[server.security]
+enable_tls = true
+allowed_ips = ["192.168.1.1", "10.0.0.5"]
+rate_limit = 1000
+
+# =====================================================================
+#                              DATABASE
+# =====================================================================
+
+[database]
+engine = "postgres"
+host = "db.example.com"
+port = 5432
+username = "admin"
+password = "secret123"
+max_connections = 20
+
+[database.replica]
+enabled = true
+hosts = ["db-replica1.example.com", "db-replica2.example.com"]
+
+[database.connection]
+timeout = 30
+retry_attempts = 3
+
+# =====================================================================
+#                          LOGGING
+# =====================================================================
+
+[logging]
+level = "INFO"
+file = "/var/log/myapp/app.log"
+
+[logging.rotation]
+enabled = true
+max_size_mb = 100
+keep_files = 10
+
+# =====================================================================
+#                           FEATURE FLAGS
+# =====================================================================
+
+[features]
+payment_system = true
+beta_ui = false
+new_recommendation_engine = true
+
+# =====================================================================
+#                        BENUTZERLISTE (Array von Tabellen)
+# =====================================================================
+
+[[users]]
+id = 1
+name = "Alice"
+email = "alice@example.com"
+roles = ["admin", "editor"]
+created_date = 2023-10-01
+created_time = 09:45:00
+
+[[users]]
+id = 2
+name = "Bob"
+email = "bob@example.com"
+roles = ["viewer"]
+created_date = 2023-11-11
+created_time = 12:00:00
+
+[[users]]
+id = 3
+name = "Charlie"
+email = "charlie@example.com"
+roles = ["editor", "moderator"]
+created_date = 2024-01-01
+created_time = 08:20:00
+
+# =====================================================================
+#                        PRODUKTE (Array von Tabellen)
+# =====================================================================
+
+[[products]]
+id = 1001
+name = "Laptop Pro"
+price = 1499.99
+categories = ["electronics", "computers"]
+available = true
+
+[[products]]
+id = 1002
+name = "SuperPhone X"
+price = 899.49
+categories = ["electronics", "phones"]
+available = true
+
+[[products]]
+id = 1003
+name = "4K Monitor"
+price = 399.00
+categories = ["electronics", "monitors"]
+available = false
+
+# =====================================================================
+#                          VERSCHIEDENE TESTDATEN
+# =====================================================================
+
+[random]
+pi = 3.14159
+colors = ["red", "green", "blue"]
+magic_numbers = [7, 13, 42]
+large_text = "Dies ist ein Wow!"
+
+# Datum und Zeit-Beispiele
+[dates]
+birthday = 1990-06-15
+meeting_date = 2024-03-05
+meeting_time = 09:30:00
+event_date_local_date = 2024-03-05
+event_date_local_time = 10:30:00

@@ -3,9 +3,14 @@
 #include "/home/codeleaded/System/Static/Library/Zip.h"
 
 int main(){
-    //char Path[] = "./data/File.txt";
-    char Path[] = "./data/Car_Green_Fast.png";
-    char Out[] = "./data/Car_Green_Fast_OUT.png";
+    //char Path[] = "./data/Car_Green_Fast.png";
+    //char Out[] = "./data/Car_Green_Fast_OUT.png";
+    //char Path[] = "./data/Main.toml";
+    //char Out[] = "./data/Main_OUT.toml";
+    //char Path[] = "./data/Main.yaml";
+    //char Out[] = "./data/Main_OUT.yaml";
+    char Path[] = "./data/Main";
+    char Out[] = "./data/Main_OUT";
     
     FilesSize fsize;
     char* data = Files_ReadB(Path,&fsize);
@@ -15,12 +20,12 @@ int main(){
     
         Zip_Size csize = fsize;
         void* compressed = Zip_Compress(data,&csize,4);
-        printf("Compressed: S: %llu\n",csize);
+        printf("Compressed: S: %lu\n",csize);
         
         Zip_Size dsize = csize;
         Zip_Size rdsize = Zip_Decompress_Size(compressed,&dsize);
         void* opened = Zip_Decompress(compressed,&dsize);
-        printf("Opened: S: %llu (%llu)\n",dsize,rdsize);
+        printf("Opened: S: %lu (%lu)\n",dsize,rdsize);
 
         printf("Output: '%s' -> %lf %%\n",Path,(double)csize / (double)fsize * 100.0);
         Files_Write(Out,opened,rdsize);
